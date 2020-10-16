@@ -8,7 +8,7 @@ import {
 } from 'build/snippet';
 
 const watchFiles = (contentDir, templates, { actions, store }) => {
-  const { createPage, deletePage } = actions;
+  const { createPage, createNode, deletePage } = actions;
   const deletePageIfExists = slug => {
     const page = store.getState().pages.get(slug);
     if (page) deletePage({ path: page.path, component: page.component });
@@ -31,6 +31,14 @@ const watchFiles = (contentDir, templates, { actions, store }) => {
         deletePageIfExists(req.relRoute);
         const context = {...req.context};
         context.snippet.vscodeUrl = req.vscodeUrl;
+        // ================  DANGER  ================
+        /*
+         * Do not touch, this is the only reason page refresh works in newer
+         * version of Gatsby. It also throws errors every once in a while, but
+         * doesn't cause crashes.
+         */
+        createNode({ id: `SitePage ${req.relRoute}`, internal: { type: 'SitePage' } });
+        // ================ /DANGER  ================
         createPage({
           path: req.relRoute,
           component: templates[req.template],
